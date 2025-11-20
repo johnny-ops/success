@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Dal Tokki Cafe · Account Verified</title>
+    <style>
+      * {
+        box-sizing: border-box;
+      }
+      body {
+        margin: 0;  
+        font-family: 'Inter', 'Segoe UI', Arial, sans-serif;
+        background: radial-gradient(circle at top, #fff7e8, #ffefde, #f7f5ff);
+        color: #1f1f2b;
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 24px;
+      }
+      .card {
+        background: #ffffff;
+        width: 100%;
+        max-width: 520px;
+        border-radius: 28px;
+        padding: 48px 40px;
+        text-align: center;
+        box-shadow: 0 35px 60px rgba(63, 45, 0, 0.12);
+      }
+      .badge {
+        width: 96px;
+        height: 96px;
+        border-radius: 24px;
+        margin: 0 auto 24px;
+        background: linear-gradient(135deg, #ffce63, #ff9a5f);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        box-shadow: 0 12px 30px rgba(255, 154, 95, 0.35);
+      }
+      .badge svg {
+        width: 48px;
+        height: 48px;
+        fill: #1f1f2b;
+      }
+      h1 {
+        margin: 0;
+        font-size: 30px;
+        letter-spacing: 0.4px;
+      }
+      p {
+        margin: 14px 0 0;
+        line-height: 1.6;
+        color: #5d5b71;
+      }
+      .cta {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 10px;
+        padding: 16px 32px;
+        border-radius: 18px;
+        background: linear-gradient(135deg, #3d2fff, #6a4dff);
+        color: #fff;
+        text-decoration: none;
+        font-size: 16px;
+        font-weight: 600;
+        margin-top: 32px;
+        box-shadow: 0 20px 24px rgba(61, 47, 255, 0.25);
+      }
+      .cta[aria-disabled="true"] {
+        opacity: 0.55;
+        pointer-events: none;
+        cursor: default;
+      }
+      .cta svg {
+        width: 18px;
+        height: 18px;
+        fill: currentColor;
+      }
+      .details {
+        margin-top: 32px;
+        padding: 18px;
+        border-radius: 18px;
+        background: #f8f6ff;
+        color: #4c4766;
+        font-size: 14px;
+      }
+    </style>
+  </head>
+  <body>
+    <main class="card">
+      <div class="badge">
+        <svg viewBox="0 0 24 24">
+          <path
+            d="M9.00008 16.2L4.80008 12L3.40008 13.4L9.00008 19L21.0001 7.00005L19.6001 5.60005L9.00008 16.2Z"
+          />
+        </svg>
+      </div>
+      <h1 id="statusHeadline">Confirming your signup…</h1>
+      <p id="statusBody">
+        Keep this tab open while we verify your email and prepare your Dal Tokki Cafe account.
+      </p>
+      <a class="cta" id="ctaButton" href="https://daltokki.cafe/app" aria-disabled="true">
+        Preparing your session…
+        <svg viewBox="0 0 24 24">
+          <path
+            d="M5 12h14M13 5l7 7-7 7"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            fill="none"
+          />
+        </svg>
+      </a>
+      <div class="details" id="detailsBox">
+        <strong>Need a hand?</strong>
+        <div>Email us at support@daltokki.cafe or visit us in-store — we’re happy to help.</div>
+      </div>
+    </main>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.0/dist/umd/supabase.min.js"></script>
+    <script>
+      const SUPABASE_URL = 'https://tbfjmhgnvtweotlqnplm.supabase.co';
+      const SUPABASE_ANON_KEY =
+        'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRiZmptaGdudnR3ZW90bHFucGxtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjI1OTk3NTcsImV4cCI6MjA3ODE3NTc1N30.8FU3eU2-ThlyQS8I-oQw_eDzcIpxSxLe-2YtNE_xLvc';
+
+      const MOBILE_DEEP_LINK = 'daltokki://auth/callback';
+      const FALLBACK_WEB_URL = 'https://daltokki.cafe/app';
+
+      const headlineEl = document.getElementById('statusHeadline');
+      const bodyEl = document.getElementById('statusBody');
+      const ctaButton = document.getElementById('ctaButton');
+
+      function parseHashParams() {
+        const hash = window.location.hash.startsWith('#') ? window.location.hash.substring(1) : '';
+        return new URLSearchParams(hash);
+      }
+
+      let sessionTokens = null;
+
+      function openApp(accessToken, refreshToken) {
+        const deepLink = `${MOBILE_DEEP_LINK}?access_token=${encodeURIComponent(accessToken)}&refresh_token=${encodeURIComponent(
+          refreshToken
+        )}&source=email`;
+        window.location.href = deepLink;
+        setTimeout(() => {
+          window.location.href = FALLBACK_WEB_URL;
+        }, 6000);
+      }
+
+      async function bootstrap() {
+        const params = parseHashParams();
+        const accessToken = params.get('access_token');
+        const refreshToken = params.get('refresh_token');
+
+        if (!accessToken || !refreshToken) {
+          headlineEl.textContent = 'Link expired';
+          bodyEl.textContent = 'Please request a new confirmation email from the Dal Tokki Cafe app.';
+          return;
+        }
+
+        try {
+          const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+          await supabase.auth.setSession({
+            access_token: accessToken,
+            refresh_token: refreshToken,
+          });
+
+          headlineEl.textContent = 'You’re all set!';
+          bodyEl.textContent = 'Your signup is confirmed. Keep the Dal Tokki Cafe app open on your phone and tap the button below to jump back in.';
+          ctaButton.textContent = 'Open Dal Tokki Cafe';
+          ctaButton.href = MOBILE_DEEP_LINK;
+          ctaButton.setAttribute('aria-disabled', 'false');
+          sessionTokens = { accessToken, refreshToken };
+        } catch (error) {
+          console.error(error);
+          headlineEl.textContent = 'Verification failed';
+          bodyEl.textContent = 'Something went wrong while verifying your email. Please return to the app and try again.';
+          ctaButton.textContent = 'Back to Dal Tokki Cafe';
+          ctaButton.href = FALLBACK_WEB_URL;
+          ctaButton.setAttribute('aria-disabled', 'false');
+        }
+      }
+
+      ctaButton.addEventListener('click', (event) => {
+        if (!sessionTokens) return;
+        event.preventDefault();
+        openApp(sessionTokens.accessToken, sessionTokens.refreshToken);
+      });
+
+      bootstrap();
+    </script>
+  </body>
+</html>
+
