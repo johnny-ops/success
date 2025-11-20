@@ -11,8 +11,8 @@
       body {
         margin: 0;  
         font-family: 'Inter', 'Segoe UI', Arial, sans-serif;
-        background: linear-gradient(135deg, #f5f5f5, #e8e8e8);
-        color: #1a1a1a;
+        background: radial-gradient(circle at top, #fff7e8, #ffefde, #f7f5ff);
+        color: #1f1f2b;
         min-height: 100vh;
         display: flex;
         align-items: center;
@@ -26,35 +26,33 @@
         border-radius: 28px;
         padding: 48px 40px;
         text-align: center;
-        box-shadow: 0 35px 60px rgba(0, 0, 0, 0.15);
-        border: 1px solid #e0e0e0;
+        box-shadow: 0 35px 60px rgba(63, 45, 0, 0.12);
       }
       .badge {
         width: 96px;
         height: 96px;
         border-radius: 24px;
         margin: 0 auto 24px;
-        background: #1a1a1a;
+        background: linear-gradient(135deg, #ffce63, #ff9a5f);
         display: flex;
         align-items: center;
         justify-content: center;
-        box-shadow: 0 12px 30px rgba(0, 0, 0, 0.2);
+        box-shadow: 0 12px 30px rgba(255, 154, 95, 0.35);
       }
       .badge svg {
         width: 48px;
         height: 48px;
-        fill: #ffffff;
+        fill: #1f1f2b;
       }
       h1 {
         margin: 0;
         font-size: 30px;
         letter-spacing: 0.4px;
-        color: #1a1a1a;
       }
       p {
         margin: 14px 0 0;
         line-height: 1.6;
-        color: #666666;
+        color: #5d5b71;
       }
       .cta {
         display: inline-flex;
@@ -63,17 +61,13 @@
         gap: 10px;
         padding: 16px 32px;
         border-radius: 18px;
-        background: #1a1a1a;
+        background: linear-gradient(135deg, #3d2fff, #6a4dff);
         color: #fff;
         text-decoration: none;
         font-size: 16px;
         font-weight: 600;
         margin-top: 32px;
-        box-shadow: 0 20px 24px rgba(0, 0, 0, 0.15);
-        transition: background 0.2s ease;
-      }
-      .cta:hover:not([aria-disabled="true"]) {
-        background: #333333;
+        box-shadow: 0 20px 24px rgba(61, 47, 255, 0.25);
       }
       .cta[aria-disabled="true"] {
         opacity: 0.55;
@@ -89,10 +83,9 @@
         margin-top: 32px;
         padding: 18px;
         border-radius: 18px;
-        background: #f5f5f5;
-        color: #4a4a4a;
+        background: #f8f6ff;
+        color: #4c4766;
         font-size: 14px;
-        border: 1px solid #e0e0e0;
       }
     </style>
   </head>
@@ -124,7 +117,7 @@
       </a>
       <div class="details" id="detailsBox">
         <strong>Need a hand?</strong>
-        <div>Email us at support@daltokki.cafe or visit us in-store — we're happy to help.</div>
+        <div>Email us at support@daltokki.cafe or visit us in-store — we’re happy to help.</div>
       </div>
     </main>
 
@@ -170,22 +163,40 @@
         }
 
         try {
-          const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-          await supabase.auth.setSession({
+          console.log('Creating Supabase client…');
+          const supabase = window.supabase?.createClient?.(SUPABASE_URL, SUPABASE_ANON_KEY);
+          if (!supabase) {
+            throw new Error('Supabase library failed to load. Please refresh this page.');
+          }
+
+          console.log('Setting session with confirmation tokens…');
+          const { error } = await supabase.auth.setSession({
             access_token: accessToken,
             refresh_token: refreshToken,
           });
+          if (error) {
+            throw error;
+          }
 
-          headlineEl.textContent = 'You're all set!';
-          bodyEl.textContent = 'Your signup is confirmed. Keep the Dal Tokki Cafe app open on your phone and tap the button below to jump back in.';
+          headlineEl.textContent = 'You’re all set!';
+          bodyEl.textContent =
+            'Your signup is confirmed. Keep the Dal Tokki Cafe app open on your phone—we will relaunch it automatically.';
           ctaButton.textContent = 'Open Dal Tokki Cafe';
           ctaButton.href = MOBILE_DEEP_LINK;
           ctaButton.setAttribute('aria-disabled', 'false');
           sessionTokens = { accessToken, refreshToken };
+
+          // Automatically trigger the deep link after a short pause
+          setTimeout(() => {
+            if (sessionTokens) {
+              openApp(sessionTokens.accessToken, sessionTokens.refreshToken);
+            }
+          }, 1500);
         } catch (error) {
-          console.error(error);
+          console.error('Email confirmation failed:', error);
           headlineEl.textContent = 'Verification failed';
-          bodyEl.textContent = 'Something went wrong while verifying your email. Please return to the app and try again.';
+          bodyEl.textContent =
+            'Something went wrong while verifying your email. Please return to the app and request a new confirmation link.';
           ctaButton.textContent = 'Back to Dal Tokki Cafe';
           ctaButton.href = FALLBACK_WEB_URL;
           ctaButton.setAttribute('aria-disabled', 'false');
@@ -198,7 +209,8 @@
         openApp(sessionTokens.accessToken, sessionTokens.refreshToken);
       });
 
-      bootstrap();
+      window.addEventListener('load', bootstrap);
     </script>
   </body>
 </html>
+
