@@ -93,13 +93,12 @@
           />
         </svg>
       </div>
-      <h1>You're all set!</h1>
-      <p>
-        Your Dal Tokki Cafe account has been successfully verified. You can now start earning points, claiming rewards, and
-        ordering your favorites straight from the app.
+      <h1 id="statusHeadline">Checking your link…</h1>
+      <p id="statusBody">
+        One moment while we verify your email and sync your account with the Dal Tokki Cafe app.
       </p>
-      <a class="cta" href="https://daltokki.cafe/app">
-        Launch the App
+      <a class="cta" id="ctaButton" href="https://daltokki.cafe/app">
+        Continue to Dal Tokki Cafe
         <svg viewBox="0 0 24 24">
           <path
             d="M5 12h14M13 5l7 7-7 7"
@@ -111,11 +110,139 @@
           />
         </svg>
       </a>
-      <div class="details">
+      <div class="details" id="detailsBox">
         <strong>Need a hand?</strong>
         <div>Email us at support@daltokki.cafe or visit us in-store — we’re happy to help.</div>
       </div>
     </main>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.0/dist/umd/supabase.min.js"></script>
+    <script>
+      const SUPABASE_URL = 'https://tbfjmhgnvtweotlqnplm.supabase.co';
+      const SUPABASE_ANON_KEY =
+        'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRiZmptaGdudnR3ZW90bHFucGxtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjI1OTk3NTcsImV4cCI6MjA3ODE3NTc1N30.8FU3eU2-ThlyQS8I-oQw_eDzcIpxSxLe-2YtNE_xLvc';
+      const MOBILE_DEEP_LINK = 'daltokki://auth/callback';
+      const FALLBACK_WEB_URL = 'https://daltokki.cafe/app';
+
+      const headlineEl = document.getElementById('statusHeadline');
+      const bodyEl = document.getElementById('statusBody');
+      const ctaButton = document.getElementById('ctaButton');
+
+      function parseHashParams() {
+        const hash = window.location.hash.startsWith('#') ? window.location.hash.substring(1) : '';
+        return new URLSearchParams(hash);
+      }
+
+      function navigateToApp(accessToken, refreshToken) {
+        const deepLink = `${MOBILE_DEEP_LINK}?access_token=${encodeURIComponent(accessToken)}&refresh_token=${encodeURIComponent(
+          refreshToken
+        )}&source=email`;
+        setTimeout(() => {
+          window.location.href = deepLink;
+        }, 2000);
+
+        // Fallback to web app if deep link is blocked
+        setTimeout(() => {
+          window.location.href = FALLBACK_WEB_URL;
+        }, 6500);
+      }
+
+      async function bootstrap() {
+        const params = parseHashParams();
+        const accessToken = params.get('access_token');
+        const refreshToken = params.get('refresh_token');
+
+        if (!accessToken || !refreshToken) {
+          headlineEl.textContent = 'Link expired';
+          bodyEl.textContent = 'Please request a new confirmation email from the Dal Tokki Cafe app.';
+          return;
+        }
+
+        try {
+          const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+          await supabase.auth.setSession({
+            access_token: accessToken,
+            refresh_token: refreshToken,
+          });
+
+          headlineEl.textContent = 'Email verified';
+          bodyEl.textContent = 'Email verified, proceeding to home screen… keep the app open on your phone.';
+          ctaButton.textContent = 'Open Dal Tokki Cafe';
+          ctaButton.href = FALLBACK_WEB_URL;
+
+          navigateToApp(accessToken, refreshToken);
+        } catch (error) {
+          console.error(error);
+          headlineEl.textContent = 'Verification failed';
+          bodyEl.textContent = 'Something went wrong while verifying your email. Please return to the app and try again.';
+        }
+      }
+
+      bootstrap();
+    </script>
+  </body>
+</html>
+
+        'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRiZmptaGdudnR3ZW90bHFucGxtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjI1OTk3NTcsImV4cCI6MjA3ODE3NTc1N30.8FU3eU2-ThlyQS8I-oQw_eDzcIpxSxLe-2YtNE_xLvc';
+      const MOBILE_DEEP_LINK = 'daltokki://auth/callback';
+      const FALLBACK_WEB_URL = 'https://daltokki.cafe/app';
+
+      const headlineEl = document.getElementById('statusHeadline');
+      const bodyEl = document.getElementById('statusBody');
+      const ctaButton = document.getElementById('ctaButton');
+
+      function parseHashParams() {
+        const hash = window.location.hash.startsWith('#') ? window.location.hash.substring(1) : '';
+        return new URLSearchParams(hash);
+      }
+
+      function navigateToApp(accessToken, refreshToken) {
+        const deepLink = `${MOBILE_DEEP_LINK}?access_token=${encodeURIComponent(accessToken)}&refresh_token=${encodeURIComponent(
+          refreshToken
+        )}&source=email`;
+        setTimeout(() => {
+          window.location.href = deepLink;
+        }, 2000);
+
+        // Fallback to web app if deep link is blocked
+        setTimeout(() => {
+          window.location.href = FALLBACK_WEB_URL;
+        }, 6500);
+      }
+
+      async function bootstrap() {
+        const params = parseHashParams();
+        const accessToken = params.get('access_token');
+        const refreshToken = params.get('refresh_token');
+
+        if (!accessToken || !refreshToken) {
+          headlineEl.textContent = 'Link expired';
+          bodyEl.textContent = 'Please request a new confirmation email from the Dal Tokki Cafe app.';
+          return;
+        }
+
+        try {
+          const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+          await supabase.auth.setSession({
+            access_token: accessToken,
+            refresh_token: refreshToken,
+          });
+
+          headlineEl.textContent = 'Email verified';
+          bodyEl.textContent = 'Email verified, proceeding to home screen… keep the app open on your phone.';
+          ctaButton.textContent = 'Open Dal Tokki Cafe';
+          ctaButton.href = FALLBACK_WEB_URL;
+
+          navigateToApp(accessToken, refreshToken);
+        } catch (error) {
+          console.error(error);
+          headlineEl.textContent = 'Verification failed';
+          bodyEl.textContent = 'Something went wrong while verifying your email. Please return to the app and try again.';
+        }
+      }
+
+      bootstrap();
+    </script>
   </body>
 </html>
 
