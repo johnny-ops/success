@@ -11,8 +11,8 @@
       body {
         margin: 0;  
         font-family: 'Inter', 'Segoe UI', Arial, sans-serif;
-        background: radial-gradient(circle at top, #ffffff, #f5f5f5, #ececec);
-        color: #1f1f2b;
+        background: radial-gradient(circle at top, #ffffff, #f5f5f5, #e8e8e8);
+        color: #1f1f1f;
         min-height: 100vh;
         display: flex;
         align-items: center;
@@ -33,16 +33,16 @@
         height: 96px;
         border-radius: 24px;
         margin: 0 auto 24px;
-        background: linear-gradient(135deg, #d0d0d0, #a0a0a0);
+        background: linear-gradient(135deg, #2a2a2a, #000000);
         display: flex;
         align-items: center;
         justify-content: center;
-        box-shadow: 0 12px 30px rgba(0, 0, 0, 0.2);
+        box-shadow: 0 12px 30px rgba(0, 0, 0, 0.25);
       }
       .badge svg {
         width: 48px;
         height: 48px;
-        fill: #1f1f2b;
+        fill: #ffffff;
       }
       h1 {
         margin: 0;
@@ -52,7 +52,7 @@
       p {
         margin: 14px 0 0;
         line-height: 1.6;
-        color: #5d5b71;
+        color: #5d5d5d;
       }
       .cta {
         display: inline-flex;
@@ -61,13 +61,13 @@
         gap: 10px;
         padding: 16px 32px;
         border-radius: 18px;
-        background: linear-gradient(135deg, #2a2a2a, #4a4a4a);
+        background: linear-gradient(135deg, #1a1a1a, #404040);
         color: #fff;
         text-decoration: none;
         font-size: 16px;
         font-weight: 600;
         margin-top: 32px;
-        box-shadow: 0 20px 24px rgba(0, 0, 0, 0.25);
+        box-shadow: 0 20px 24px rgba(0, 0, 0, 0.2);
       }
       .cta[aria-disabled="true"] {
         opacity: 0.55;
@@ -84,7 +84,7 @@
         padding: 18px;
         border-radius: 18px;
         background: #f5f5f5;
-        color: #4c4766;
+        color: #4a4a4a;
         font-size: 14px;
       }
     </style>
@@ -133,6 +133,7 @@
       const headlineEl = document.getElementById('statusHeadline');
       const bodyEl = document.getElementById('statusBody');
       const ctaButton = document.getElementById('ctaButton');
+      const isMobileDevice = /android|iphone|ipad|ipod/i.test(window.navigator.userAgent);
 
       function parseHashParams() {
         const hash = window.location.hash.startsWith('#') ? window.location.hash.substring(1) : '';
@@ -159,8 +160,21 @@
         if (!accessToken || !refreshToken) {
           headlineEl.textContent = 'Link expired';
           bodyEl.textContent = 'Please request a new confirmation email from the Dal Tokki Cafe app.';
+          ctaButton.textContent = 'Back to Dal Tokki Cafe';
+          ctaButton.href = FALLBACK_WEB_URL;
+          ctaButton.setAttribute('aria-disabled', 'false');
           return;
         }
+
+        // Immediately show success UI so users know the link worked
+        headlineEl.textContent = 'Email verified!';
+        bodyEl.textContent = isMobileDevice
+          ? 'Hang tight — we are reopening Dal Tokki Cafe on your phone automatically. If nothing happens, tap the button below.'
+          : 'Email verified! Open this page on your phone (or tap the button below) to finish logging in.';
+        ctaButton.textContent = 'Return to Dal Tokki Cafe';
+        ctaButton.href = MOBILE_DEEP_LINK;
+        ctaButton.setAttribute('aria-disabled', 'false');
+        sessionTokens = { accessToken, refreshToken };
 
         try {
           console.log('Creating Supabase client…');
@@ -178,20 +192,16 @@
             throw error;
           }
 
-          headlineEl.textContent = 'You're all set!';
-          bodyEl.textContent =
-            'Your signup is confirmed. Keep the Dal Tokki Cafe app open on your phone—we will relaunch it automatically.';
-          ctaButton.textContent = 'Open Dal Tokki Cafe';
-          ctaButton.href = MOBILE_DEEP_LINK;
-          ctaButton.setAttribute('aria-disabled', 'false');
-          sessionTokens = { accessToken, refreshToken };
-
-          // Automatically trigger the deep link after a short pause
-          setTimeout(() => {
-            if (sessionTokens) {
-              openApp(sessionTokens.accessToken, sessionTokens.refreshToken);
-            }
-          }, 1500);
+          if (isMobileDevice) {
+            setTimeout(() => {
+              if (sessionTokens) {
+                openApp(sessionTokens.accessToken, sessionTokens.refreshToken);
+              }
+            }, 1500);
+          } else {
+            bodyEl.textContent =
+              'Email verified! To finish logging in automatically, open this email on your phone or tap the button below while the app is open.';
+          }
         } catch (error) {
           console.error('Email confirmation failed:', error);
           headlineEl.textContent = 'Verification failed';
