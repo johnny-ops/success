@@ -11,7 +11,7 @@
       body {
         margin: 0;  
         font-family: 'Inter', 'Segoe UI', Arial, sans-serif;
-        background: radial-gradient(circle at top, #fff7e8, #ffefde, #f7f5ff);
+        background: radial-gradient(circle at top, #ffffff, #f5f5f5, #ececec);
         color: #1f1f2b;
         min-height: 100vh;
         display: flex;
@@ -26,18 +26,18 @@
         border-radius: 28px;
         padding: 48px 40px;
         text-align: center;
-        box-shadow: 0 35px 60px rgba(63, 45, 0, 0.12);
+        box-shadow: 0 35px 60px rgba(0, 0, 0, 0.12);
       }
       .badge {
         width: 96px;
         height: 96px;
         border-radius: 24px;
         margin: 0 auto 24px;
-        background: linear-gradient(135deg, #ffce63, #ff9a5f);
+        background: linear-gradient(135deg, #d0d0d0, #a0a0a0);
         display: flex;
         align-items: center;
         justify-content: center;
-        box-shadow: 0 12px 30px rgba(255, 154, 95, 0.35);
+        box-shadow: 0 12px 30px rgba(0, 0, 0, 0.2);
       }
       .badge svg {
         width: 48px;
@@ -61,13 +61,13 @@
         gap: 10px;
         padding: 16px 32px;
         border-radius: 18px;
-        background: linear-gradient(135deg, #3d2fff, #6a4dff);
+        background: linear-gradient(135deg, #2a2a2a, #4a4a4a);
         color: #fff;
         text-decoration: none;
         font-size: 16px;
         font-weight: 600;
         margin-top: 32px;
-        box-shadow: 0 20px 24px rgba(61, 47, 255, 0.25);
+        box-shadow: 0 20px 24px rgba(0, 0, 0, 0.25);
       }
       .cta[aria-disabled="true"] {
         opacity: 0.55;
@@ -83,7 +83,7 @@
         margin-top: 32px;
         padding: 18px;
         border-radius: 18px;
-        background: #f8f6ff;
+        background: #f5f5f5;
         color: #4c4766;
         font-size: 14px;
       }
@@ -117,7 +117,7 @@
       </a>
       <div class="details" id="detailsBox">
         <strong>Need a hand?</strong>
-        <div>Email us at support@daltokki.cafe or visit us in-store — we’re happy to help.</div>
+        <div>Email us at support@daltokki.cafe or visit us in-store — we're happy to help.</div>
       </div>
     </main>
 
@@ -178,7 +178,7 @@
             throw error;
           }
 
-          headlineEl.textContent = 'You’re all set!';
+          headlineEl.textContent = 'You're all set!';
           bodyEl.textContent =
             'Your signup is confirmed. Keep the Dal Tokki Cafe app open on your phone—we will relaunch it automatically.';
           ctaButton.textContent = 'Open Dal Tokki Cafe';
@@ -213,4 +213,3 @@
     </script>
   </body>
 </html>
-
