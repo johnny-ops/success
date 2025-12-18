@@ -112,7 +112,7 @@
       <p id="statusBody">
         Keep this tab open while we verify your email and prepare your Dal Tokki Cafe account.
       </p>
-      <a class="cta" id="ctaButton" href="https://daltokki.cafe/app" aria-disabled="true">
+      <a class="cta" id="ctaButton" href="https://chrysxava-s-dal-tokki-cafe.vercel.app/" aria-disabled="true">
         Preparing your session…
         <svg viewBox="0 0 24 24">
           <path
@@ -138,7 +138,7 @@
         'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRiZmptaGdudnR3ZW90bHFucGxtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjI1OTk3NTcsImV4cCI6MjA3ODE3NTc1N30.8FU3eU2-ThlyQS8I-oQw_eDzcIpxSxLe-2YtNE_xLvc';
 
       const MOBILE_DEEP_LINK = 'daltokki://auth/callback';
-      const FALLBACK_WEB_URL = 'https://daltokki.cafe/app';
+      const FALLBACK_WEB_URL = 'https://chrysxava-s-dal-tokki-cafe.vercel.app/';
 
       const headlineEl = document.getElementById('statusHeadline');
       const bodyEl = document.getElementById('statusBody');
@@ -165,13 +165,8 @@
       let sessionTokens = null;
 
       function openApp(accessToken, refreshToken) {
-        const deepLink = `${MOBILE_DEEP_LINK}?access_token=${encodeURIComponent(accessToken)}&refresh_token=${encodeURIComponent(
-          refreshToken
-        )}&source=email`;
-        window.location.href = deepLink;
-        setTimeout(() => {
-          window.location.href = FALLBACK_WEB_URL;
-        }, 6000);
+        // Redirect directly to the Dal Tokki Cafe website
+        window.location.href = 'https://chrysxava-s-dal-tokki-cafe.vercel.app/';
       }
 
       async function bootstrap() {
@@ -190,11 +185,9 @@
 
         // Immediately show success UI so users know the link worked
         headlineEl.textContent = 'Email verified!';
-        bodyEl.textContent = isMobileDevice
-          ? 'Hang tight — we are reopening Dal Tokki Cafe on your phone automatically. If nothing happens, tap the button below.'
-          : 'Email verified! Open this page on your phone (or tap the button below) to finish logging in.';
-        ctaButton.textContent = 'Return to Dal Tokki Cafe';
-        ctaButton.href = MOBILE_DEEP_LINK;
+        bodyEl.textContent = 'Your email has been successfully verified. Click the button below to visit Dal Tokki Cafe.';
+        ctaButton.textContent = 'Go to Dal Tokki Cafe';
+        ctaButton.href = 'https://chrysxava-s-dal-tokki-cafe.vercel.app/';
         ctaButton.setAttribute('aria-disabled', 'false');
         sessionTokens = { accessToken, refreshToken };
 
@@ -220,9 +213,6 @@
                 openApp(sessionTokens.accessToken, sessionTokens.refreshToken);
               }
             }, 1500);
-          } else {
-            bodyEl.textContent =
-              'Email verified! To finish logging in automatically, open this email on your phone or tap the button below while the app is open.';
           }
         } catch (error) {
           console.error('Email confirmation failed:', error);
